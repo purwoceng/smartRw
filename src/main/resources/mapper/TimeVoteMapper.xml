@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.codean.smart_rw.mapper.TimeVoteMapper">
+
+    <select id="findAll" resultType="com.codean.smart_rw.model.pojo.TimeVotePojo">
+        SELECT
+        t.time_vote_id,
+        t.jam_mulai,
+        t.jam_selesai,
+        t.created_at,
+        t.updated_at
+        from time_vote t
+        <if test="sortField != null and sortOrder != null">
+            ORDER BY ${sortField} ${sortOrder}
+        </if>
+        <if test="offset >= 0">
+            OFFSET #{offset}
+        </if>
+        <if test="limit >= 0">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="timeVoteId" keyColumn="time_vote_id" parameterType="com.codean.smart_rw.model.pojo.TimeVotePojo">
+        INSERT INTO time_vote
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="timeVoteId !=null">time_vote_id,</if>
+            <if test="jamMulai !=null">jam_mulai,</if>
+            <if test="jamSelesai !=null">jam_selesai,</if>
+            <if test="createdAt !=null">created_at,</if>
+            <if test="updatedAt !=null">updated_at,</if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="timeVoteId !=null">#{timeVoteId}::uuid,</if>
+            <if test="jamMulai !=null">#{jamMulai},</if>
+            <if test="jamSelesai !=null">#{jamSelesai},</if>
+            <if test="createdAt !=null">#{createdAt},</if>
+            <if test="updatedAt !=null">#{updatedAt},</if>
+        </trim>
+    </insert>
+
+    <select id="findById" parameterType="String">
+        SELECT
+        t.time_vote_id,
+        t.jam_mulai,
+        t.jam_selesai,
+        t.created_at,
+        t.updated_at
+        from time_vote t
+        WHERE t.time_vote_id=#{timeVoteId}::uuid
+    </select>
+
+    <update id="update" parameterType="com.codean.smart_rw.model.pojo.TimeVotePojo">
+        UPDATE time_vote
+        <set>
+            <if test="jamMulai != null">jam_mulai = #{jamMulai},</if>
+            <if test="jamSelesai != null">jam_selesai = #{jamSelesai},</if>
+            <if test="updatedAt != null">updated_at = now(),</if>
+        </set>
+        WHERE time_vote_id = #{timeVoteId}::uuid
+    </update>
+
+    <delete id="delete">
+        DELETE FROM time_vote
+        WHERE time_vote_id = #{timeVoteId}::uuid
+    </delete>
+</mapper>

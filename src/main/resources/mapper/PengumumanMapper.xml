@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.codean.smart_rw.mapper.PengumumanMapper">
+
+    <select id="findAll" resultType="com.codean.smart_rw.model.pojo.PengumumanPojo">
+        SELECT * FROM pengumuman
+        <if test="sortField != null and sortOrder != null">
+            ORDER BY ${sortField} ${sortOrder}
+        </if>
+        <if test="offset >= 0">
+            OFFSET #{offset}
+        </if>
+        <if test="limit >= 0">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="pengumumanId" keyColumn="pengumuman_id" parameterType="com.codean.smart_rw.model.pojo.PengumumanPojo">
+        INSERT INTO pengumuman
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="pengumumanId !=null">pengumuman_id,</if>
+            <if test="deskripsi !=null">deskripsi,</if>
+            <if test="image !=null">image,</if>
+            <if test="createdAt !=null">created_at,</if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="pengumumanId !=null">#{pengumumanId}::uuid,</if>
+            <if test="deskripsi !=null">#{deskripsi},</if>
+            <if test="image !=null">#{image},</if>
+            <if test="createdAt !=null">#{createdAt},</if>
+        </trim>
+    </insert>
+
+    <select id="findById" parameterType="String">
+        SELECT * FROM pengumuman
+        WHERE pengumuman_id=#{pengumumanId}::uuid
+    </select>
+</mapper>

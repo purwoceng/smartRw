@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.codean.smart_rw.mapper.LokasiMapper">
+
+    <select id="findAll" resultType="com.codean.smart_rw.model.pojo.LokasiPojo">
+        SELECT * FROM lokasi
+        <if test="sortField != null and sortOrder != null">
+            ORDER BY ${sortField} ${sortOrder}
+        </if>
+        <if test="offset >= 0">
+            OFFSET #{offset}
+        </if>
+        <if test="limit >= 0">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="lokasiId" keyColumn="lokasi_id" parameterType="com.codean.smart_rw.model.pojo.LokasiPojo">
+        INSERT INTO lokasi
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="lokasiId !=null">lokasi_id,</if>
+            <if test="latitude !=null">latitude,</if>
+            <if test="longitude !=null">longitude,</if>
+            <if test="radius !=null">radius,</if>
+            <if test="namaLokasi !=null">nama_lokasi,</if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="lokasiId !=null">#{lokasiId}::uuid,</if>
+            <if test="latitude !=null">#{latitude},</if>
+            <if test="longitude !=null">#{longitude},</if>
+            <if test="radius !=null">#{radius},</if>
+            <if test="namaLokasi !=null">=#{namaLokasi},</if>
+        </trim>
+    </insert>
+
+    <select id="findById" parameterType="String">
+        SELECT * FROM lokasi
+        WHERE lokasi_id=#{lokasiId}::uuid
+    </select>
+
+    <update id="update" parameterType="com.codean.smart_rw.model.pojo.LokasiPojo">
+        UPDATE lokasi
+        <set>
+            <if test="latitude !=null">latitude=#{latitude},</if>
+            <if test="longitude != null">longitude = #{longitude},</if>
+            <if test="radius !=null">radius=#{radius},</if>
+            <if test="namaLokasi !=null">nama_lokasi=#{namaLokasi},</if>
+        </set>
+        WHERE lokasi_id = #{lokasiId}::uuid
+    </update>
+
+    <delete id="delete">
+        DELETE FROM lokasi
+        WHERE lokasi_id = #{lokasiId}::uuid
+    </delete>
+</mapper>

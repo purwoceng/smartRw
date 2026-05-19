@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.codean.smart_rw.mapper.LogNotifikasiMapper">
+
+    <select id="findAll" resultType="com.codean.smart_rw.model.pojo.LogNotifikasiPojo">
+        SELECT * FROM log_notifikasi
+        <if test="sortField != null and sortOrder != null">
+            ORDER BY ${sortField} ${sortOrder}
+        </if>
+        <if test="offset >= 0">
+            OFFSET #{offset}
+        </if>
+        <if test="limit >= 0">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="logId" keyColumn="log_id" parameterType="com.codean.smart_rw.model.pojo.LogNotifikasiPojo">
+        INSERT INTO log_notifikasi
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="logId !=null">log_id,</if>
+            <if test="pengumumanId !=null">pengumuman_id,</if>
+            <if test="userId !=null">user_id,</if>
+            <if test="channel !=null">channel,</if>
+            <if test="status !=null">status,</if>
+            <if test="responseTelegram !=null">response_telegram,</if>
+            <if test="sentAt !=null">sent_at,</if>
+            <if test="jenisNotifikasi !=null">jenis_notifikasi,</if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="logId !=null">#{logId}::uuid,</if>
+            <if test="pengumumanId !=null">#{pengumumanId}::uuid,</if>
+            <if test="userId !=null">#{userId}::uuid,</if>
+            <if test="channel !=null">#{channel},</if>
+            <if test="status !=null">#{status},</if>
+            <if test="responseTelegram !=null">#{responseTelegram},</if>
+            <if test="sentAt !=null">#{sentAt},</if>
+            <if test="jenisNotifikasi !=null">#{jenisNotifikasi}</if>
+        </trim>
+    </insert>
+
+    <select id="findById" parameterType="String">
+        SELECT * FROM log_notifikasi
+        WHERE log_id=#{logId}::uuid
+    </select>
+</mapper>

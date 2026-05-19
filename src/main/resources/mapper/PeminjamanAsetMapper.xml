@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.codean.smart_rw.mapper.PeminjamanAsetMapper">
+
+    <resultMap id="PeminjamanResultMap" type="com.codean.smart_rw.model.pojo.PeminjamanAsetPojo">
+        <id property="peminjamanId" column="peminjaman_id"/>
+        <result property="status" column="status"/>
+        <result property="keterangan" column="keterangan"/>
+        <result property="tanggalPinjam" column="tanggal_pinjam"/>
+        <result property="tanggalKembali" column="tanggal_kembali"/>
+        <result property="userId" column="user_id"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <collection property="items" ofType="com.codean.smart_rw.model.pojo.DetailPeminjamanAsetPojo">
+            <id property="peminjamanDetailId" column="peminjaman_detail_id"/>
+            <result property="peminjamanId" column="peminjaman_id"/>
+            <result property="asetId" column="aset_id"/>
+            <result property="jumlah" column="jumlah"/>
+        </collection>
+    </resultMap>
+
+    <select id="findAll" resultType="com.codean.smart_rw.model.pojo.PeminjamanAsetPojo">
+        SELECT * FROM peminjaman_aset
+        <if test="sortField != null and sortOrder != null">
+            ORDER BY ${sortField} ${sortOrder}
+        </if>
+        <if test="offset >= 0">
+            OFFSET #{offset}
+        </if>
+        <if test="limit >= 0">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="peminjamanId" keyColumn="peminjaman_id" parameterType="com.codean.smart_rw.model.pojo.PeminjamanAsetPojo">
+        INSERT INTO peminjaman_aset
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="peminjamanId !=null">peminjaman_id,</if>
+            <if test="status !=null">status,</if>
+            <if test="keterangan !=null">keterangan,</if>
+            <if test="userId !=null">user_id,</if>
+            <if test="tanggalPinjam !=null">tanggal_pinjam,</if>
+            <if test="tanggalKembali !=null">tanggal_kembali,</if>
+            <if test="createdAt !=null">created_at,</if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="peminjamanId !=null">#{peminjamanId}::uuid,</if>
+            <if test="status !=null">#{status},</if>
+            <if test="keterangan !=null">#{keterangan},</if>
+            <if test="userId !=null">#{userId}::uuid,</if>
+            <if test="tanggalPinjam !=null">#{tanggalPinjam},</if>
+            <if test="tanggalKembali !=null">#{tanggalKembali},</if>
+            <if test="createdAt !=null">#{createdAt},</if>
+        </trim>
+    </insert>
+
+    <insert id="insertDetails" useGeneratedKeys="true" keyProperty="peminjamanDetailId" keyColumn="peminjaman_detail_id" parameterType="com.codean.smart_rw.model.pojo.DetailPeminjamanAsetPojo">
+        INSERT INTO peminjaman_aset_detail
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="peminjamanDetailId !=null">peminjaman_detail_id,</if>
+            <if test="peminjamanId !=null">peminjaman_id,</if>
+            <if test="asetId !=null">aset_id,</if>
+            <if test="jumlah !=null">jumlah,</if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="peminjamanDetailId !=null">#{peminjamanDetailId}::uuid,</if>
+            <if test="peminjamanId !=null">#{peminjamanId}::uuid,</if>
+            <if test="asetId !=null">#{asetId}::uuid,</if>
+            <if test="jumlah !=null">#{jumlah},</if>
+        </trim>
+    </insert>
+
+    <select id="findById" parameterType="String" resultMap="PeminjamanResultMap">
+        SELECT
+        p.peminjaman_id ,
+        p.status,
+        p.keterangan,
+        p.tanggal_pinjam,
+        p.tanggal_kembali,
+        p.user_id,
+        p.created_at,
+        p.updated_at,
+        d.peminjaman_detail_id,
+        d.peminjaman_id,
+        d.aset_id,
+        d.jumlah
+        FROM peminjaman_aset p join peminjaman_aset_detail d on p.peminjaman_id = d.peminjaman_id
+        WHERE p.peminjaman_id=#{peminjamanId}::uuid
+    </select>
+
+    <update id="update" parameterType="com.codean.smart_rw.model.pojo.PeminjamanAsetPojo">
+        UPDATE peminjaman_aset
+        <set>
+            <if test="status !=null">status=#{status},</if>
+            <if test="keterangan !=null">keterangan=#{keterangan},</if>
+<!--            <if test="userId !=null">#{userId}::uuid,</if>-->
+            <if test="tanggalPinjam !=null">tanggal_pinjam=#{tanggalPinjam},</if>
+            <if test="tanggalKembali !=null">tanggal_kembali=#{tanggalKembali},</if>
+            <if test="updatedAt !=null">updated_at=#{updatedAt},</if>
+
+        </set>
+        WHERE peminjaman_id = #{peminjamanId}::uuid
+    </update>
+
+    <update id="updateDetails" parameterType="com.codean.smart_rw.model.pojo.DetailPeminjamanAsetPojo">
+        UPDATE peminjaman_aset_detail
+        <set>
+            <if test="jumlah !=null">jumlah=#{jumlah},</if>
+        </set>
+        WHERE peminjaman-detail_id = #{peminjamanDetailId}::uuid
+    </update>
+
+    <delete id="delete">
+        DELETE FROM peminjaman_aset
+        WHERE peminjaman_id = #{peminjamanId}::uuid
+    </delete>
+
+    <delete id="deleteDetailByPeminjamanId">
+        DELETE FROM peminjaman_aset_detail
+        WHERE peminjaman_id = #{peminjamanId}::uuid
+    </delete>
+    
+    <select id="findDetailByPeminjamanId">
+        SELECT * FROM peminjaman_aset_detail
+        WHERE peminjaman_id = #{peminjamanId}::uuid
+    </select>
+</mapper>

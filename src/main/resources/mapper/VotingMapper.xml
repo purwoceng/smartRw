@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.codean.smart_rw.mapper.VotingMapper">
+
+    <select id="findAll" resultType="com.codean.smart_rw.model.pojo.VotingPojo">
+        SELECT
+        vote_id,time_vote_id,kandidat_id,user_id,created_at,updated_at
+        FROM voting
+        <if test="sortField != null and sortOrder != null">
+            ORDER BY ${sortField} ${sortOrder}
+        </if>
+        <if test="offset >= 0">
+            OFFSET #{offset}
+        </if>
+        <if test="limit >= 0">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="voteId" keyColumn="vote_id" parameterType="com.codean.smart_rw.model.pojo.VotingPojo">
+        INSERT INTO voting
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="voteId !=null">vote_id,</if>
+            <if test="kandidatId !=null">kandidat_id,</if>
+            <if test="timeVoteId !=null">time_vote_id,</if>
+            <if test="userId !=null">user_id,</if>
+            <if test="createdAt !=null">created_at,</if>
+            <if test="updatedAt !=null">updated_at,</if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="voteId !=null">#{voteId}::uuid,</if>
+            <if test="kandidatId !=null">#{kandidatId}::uuid,</if>
+            <if test="timeVoteId !=null">#{timeVoteId}::uuid,</if>
+            <if test="userId !=null">#{userId}::uuid,</if>
+            <if test="createdAt !=null">#{createdAt},</if>
+            <if test="updatedAt !=null">#{updatedAt},</if>
+        </trim>
+    </insert>
+
+    <select id="findById" parameterType="String">
+        SELECT * FROM voting
+        WHERE vote_id=#{voteId}::uuid
+    </select>
+
+    <select id="findByUserIdandTimeVoteId">
+        SELECT user_id,time_vote_id from voting
+        WHERE user_id=#{userId}::uuid AND time_vote_id=#{timeVoteId}::uuid
+    </select>
+
+
+</mapper>

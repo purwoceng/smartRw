@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.codean.smart_rw.mapper.RolesMapper">
+    <resultMap id="RoleResultMap" type="com.codean.smart_rw.model.pojo.RolesPojo">
+        <id property="roleId" column="role_id"/>
+        <result property="namaRole" column="nama"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="RoleResultMap">
+        SELECT * FROM roles
+        <if test="sortField != null and sortOrder != null">
+            ORDER BY ${sortField} ${sortOrder}
+        </if>
+        <if test="offset >= 0">
+            OFFSET #{offset}
+        </if>
+        <if test="limit >= 0">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <select id="findById" resultMap="RoleResultMap" parameterType="String">
+        SELECT * FROM roles WHERE role_id = #{roleId}::uuid
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="roleId" keyColumn="role_id" parameterType="com.codean.smart_rw.model.pojo.RolesPojo">
+        INSERT INTO roles
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="roleId !=null">role_id,</if>
+            <if test="namaRole !=null">nama,</if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="roleId !=null">#{roleId}::uuid,</if>
+            <if test="namaRole !=null">#{namaRole},</if>
+        </trim>
+    </insert>
+
+    <select id="totalData" resultType="int">
+        SELECT COUNT(*) FROM roles
+    </select>
+
+    <update id="update" parameterType="com.codean.smart_rw.model.pojo.RolesPojo">
+        UPDATE roles SET
+        <trim suffixOverrides=",">
+            <if test="namaRole !=null">nama=#{nama}</if>
+        </trim>
+        WHERE role_id=#{roleId}::uuid
+    </update>
+
+    <delete id="delete">
+        DELETE FROM roles
+        WHERE role_id=#{roleId}::uuid
+    </delete>
+
+    <select id="findRolesByUserId" resultMap="RoleResultMap" resultType="com.codean.smart_rw.model.pojo.RolesPojo">
+        SELECT r.role_id, r.nama
+        FROM roles r
+        JOIN user_roles ur ON ur.role_id = r.role_id
+        WHERE ur.user_id = #{userId}::uuid
+    </select>
+
+
+</mapper>

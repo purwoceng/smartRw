@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.codean.smart_rw.mapper.UsersMapper">
+
+    <resultMap id="UsersResultMap" type="com.codean.smart_rw.model.pojo.UsersPojo">
+        <id property="userId" column="user_id"/>
+        <result property="nik" column="nik"/>
+        <result property="nama" column="nama"/>
+        <result property="tempatLahir" column="tempat_lahir"/>
+        <result property="tanggalLahir" column="tanggal_lahir"/>
+        <result property="alamat" column="alamat"/>
+        <result property="jenisKelamin" column="jenis_kelamin"/>
+        <result property="status" column="status"/>
+        <result property="telepon" column="telepon"/>
+        <result property="chatId" column="telegram_chat_id"/>
+        <result property="email" column="email"/>
+        <result property="userName" column="username"/>
+        <result property="password" column="password"/>
+        <result property="umur" column="umur"/>
+        <collection property="roles" ofType="com.codean.smart_rw.model.pojo.RolesPojo">
+            <id property="roleId" column="role_id"/>
+            <result property="namaRole" column="role_nama"/>
+        </collection>
+    </resultMap>
+
+    <select id="findAll" resultMap="UsersResultMap" resultType="com.codean.smart_rw.model.pojo.UsersPojo">
+        SELECT
+        u.user_id,
+        u.nik,
+        u.nama,
+        u.nik,
+        u.alamat,
+        u.jenis_kelamin,
+        u.status,
+        u.telegram_chat_id,
+        AGE(CURRENT_DATE,u.tanggal_lahir) as umur,
+        u.email,
+        r.role_id,
+        r.nama as role_nama
+        FROM users u left join user_roles ur on u.user_id=ur.user_id left join roles r
+        on ur.role_id=r.role_id
+        <if test="sortField != null and sortOrder != null">
+            ORDER BY ${sortField} ${sortOrder}
+        </if>
+        <if test="offset >= 0">
+            OFFSET #{offset}
+        </if>
+        <if test="limit >= 0">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <insert id="insertUsers" useGeneratedKeys="true" keyProperty="userId" keyColumn="user_id" parameterType="com.codean.smart_rw.model.pojo.UsersPojo">
+        INSERT INTO users
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId !=null">user_id,</if>
+            <if test="nik !=null">nik,</if>
+            <if test="nama !=null">nama,</if>
+            <if test="tempatLahir !=null">tempat_lahir,</if>
+            <if test="tanggalLahir !=null">tanggal_lahir,</if>
+            <if test="alamat !=null">alamat,</if>
+            <if test="jenisKelamin !=null">jenis_kelamin,</if>
+            <if test="status !=null">status,</if>
+            <if test="telepon !=null">telepon,</if>
+            <if test="chatId !=null">telegram_chat_id,</if>
+            <if test="email !=null">email,</if>
+            <if test="userName !=null">username,</if>
+            <if test="password !=null">password,</if>
+            <if test="createdAt !=null">created_at,</if>
+            <if test="updatedAt !=null">updated_at,</if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId !=null">#{userId}::uuid,</if>
+            <if test="nik !=null">#{nik},</if>
+            <if test="nama !=null">#{nama},</if>
+            <if test="tempatLahir !=null">#{tempatLahir},</if>
+            <if test="tanggalLahir !=null">#{tanggalLahir},</if>
+            <if test="alamat !=null">#{alamat},</if>
+            <if test="jenisKelamin !=null">#{jenisKelamin},</if>
+            <if test="status !=null">#{status},</if>
+            <if test="telepon !=null">#{telepon},</if>
+            <if test="chatId !=null">#{chatId},</if>
+            <if test="email !=null">#{email},</if>
+            <if test="userName !=null">#{userName},</if>
+            <if test="password !=null">#{password},</if>
+            <if test="createdAt !=null">#{createdAt},</if>
+            <if test="updatedAt !=null">#{updatedAt},</if>
+        </trim>
+        RETURNING user_id
+    </insert>
+
+    <insert id="insertUserRole" useGeneratedKeys="true" keyProperty="userRoleId" keyColumn="user_role_id" parameterType="com.codean.smart_rw.model.pojo.UserRoles">
+        INSERT INTO user_roles(user_role_id,user_id,role_id)
+        VALUES (#{userRoleId}::uuid,#{userId}::uuid,#{roleId}::uuid)
+    </insert>
+
+    <select id="findById" resultMap="UsersResultMap" parameterType="String">
+        SELECT
+        u.user_id,
+        u.nik,
+        u.nama,
+        u.tempat_lahir,
+        u.tanggal_lahir,
+        u.alamat,
+        u.jenis_kelamin,
+        u.status,
+        u.telepon,
+        u.telegram_chat_id,
+        u.email,
+        u.username,
+        u.password,
+        u.created_at,
+        u.updated_at,
+        r.role_id,
+        r.nama as role_nama
+        FROM users u
+        LEFT JOIN user_roles ur ON u.user_id = ur.user_id
+        LEFT JOIN roles r ON ur.role_id = r.role_id
+        WHERE u.user_id=#{userId}::uuid
+    </select>
+
+    <update id="updateUsers" parameterType="com.codean.smart_rw.model.pojo.UsersPojo">
+        UPDATE users
+        <set>
+            <if test="nik != null">nik = #{nik},</if>
+            <if test="nama != null">nama = #{nama},</if>
+            <if test="tempatLahir != null">tempat_lahir = #{tempatLahir},</if>
+            <if test="tanggalLahir != null">tanggal_lahir = #{tanggalLahir},</if>
+            <if test="alamat != null">alamat = #{alamat},</if>
+            <if test="jenisKelamin != null">jenis_kelamin = #{jenisKelamin},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="telepon != null">telepon = #{telepon},</if>
+            <if test="chatId != null">telegram_chat_id = #{chatId},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="userName != null">username = #{userName},</if>
+            <if test="password != null">password = #{password},</if>
+            <if test="updatedAt != null">updated_at = now(),</if>
+        </set>
+        WHERE user_id = #{userId}::uuid
+    </update>
+
+    <update id="activationUsers" parameterType="com.codean.smart_rw.model.pojo.UsersPojo">
+        UPDATE users
+        SET
+        username = #{userName},
+        email = #{email},
+        password = #{password},
+        updated_at = now()
+        WHERE user_id = #{userId}::uuid
+    </update>
+
+    <delete id="delete">
+        DELETE FROM users
+        WHERE user_id=#{userId}::uuid
+    </delete>
+
+    <select id="totalData" resultType="int">
+        SELECT COUNT(*) FROM users
+    </select>
+
+    <select id="findByEmail">
+        SELECT u.user_id,
+        u.email,
+        u.username,
+        u.password,
+        r.role_id,
+        r.nama as role_nama
+        FROM users u
+        LEFT JOIN user_roles ur ON ur.user_id = u.user_id
+        LEFT JOIN roles r ON r.role_id = ur.role_id
+        WHERE u.email = #{email}
+    </select>
+
+    <select id="findByNik">
+        SELECT user_id,nik from users where nik = #{nik}
+    </select>
+
+    <select id="findUserWithChatId">
+        SELECT
+        user_id,
+        telegram_chat_id as chatId
+        FROM users
+        WHERE telegram_chat_id IS NOT NULL
+    </select>
+
+</mapper>

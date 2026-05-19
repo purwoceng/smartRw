@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.codean.smart_rw.mapper.AsetMapper">
+
+    <select id="findAll" resultType="com.codean.smart_rw.model.pojo.AsetPojo">
+        SELECT * FROM aset
+        <if test="sortField != null and sortOrder != null">
+            ORDER BY ${sortField} ${sortOrder}
+        </if>
+        <if test="offset >= 0">
+            OFFSET #{offset}
+        </if>
+        <if test="limit >= 0">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="asetId" keyColumn="aset_id" parameterType="com.codean.smart_rw.model.pojo.AsetPojo">
+        INSERT INTO aset
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="asetId !=null">aset_id,</if>
+            <if test="kategoriAset !=null">kategori_aset,</if>
+            <if test="namaAset !=null">nama_aset,</if>
+            <if test="jumlah !=null">jumlah,</if>
+            <if test="status !=null">status,</if>
+            <if test="kondisi !=null">kondisi,</if>
+            <if test="createdAt !=null">created_at,</if>
+            <if test="updatedAt !=null">updated_at,</if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="asetId !=null">#{asetId}::uuid,</if>
+            <if test="kategoriAset !=null">#{kategoriAset},</if>
+            <if test="namaAset !=null">#{namaAset},</if>
+            <if test="jumlah !=null">#{jumlah},</if>
+            <if test="status !=null">#{status},</if>
+            <if test="kondisi !=null">#{kondisi},</if>
+            <if test="createdAt !=null">#{createdAt},</if>
+            <if test="updatedAt !=null">#{updatedAt},</if>
+        </trim>
+    </insert>
+
+    <select id="findById" parameterType="String">
+        SELECT * FROM aset
+        WHERE aset_id=#{asetId}::uuid
+    </select>
+
+    <update id="update" parameterType="com.codean.smart_rw.model.pojo.AsetPojo">
+        UPDATE aset
+        <set>
+            <if test="kategoriAset != null">kategori_aset = #{kategoriAset},</if>
+            <if test="namaAset !=null">nama_aset=#{namaAset},</if>
+            <if test="jumlah !=null">jumlah=#{jumlah},</if>
+            <if test="status !=null">status=#{status},</if>
+            <if test="kondisi !=null">kondisi=#{kondisi},</if>
+            <if test="updatedAt !=null">updated_at=#{updatedAt},</if>
+        </set>
+        WHERE aset_id = #{asetId}::uuid
+    </update>
+
+    <delete id="delete">
+        DELETE FROM aset
+        WHERE aset_id = #{asetId}::uuid
+    </delete>
+</mapper>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.codean.smart_rw.mapper.JadwalRondaMapper">
+
+    <resultMap id="JadwalResultMap" type="com.codean.smart_rw.model.pojo.JadwalRondaPojo">
+        <id property="jadwalId" column="jadwal_id"/>
+        <result property="hari" column="hari"/>
+        <result property="jamMulai" column="jam_mulai"/>
+        <result property="jamSelesai" column="jam_selesai"/>
+        <result property="status" column="status"/>
+        <result property="lokasiId" column="lokasi_id"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <collection property="userId" ofType="com.codean.smart_rw.model.pojo.JadwalRondaUserPojo">
+            <id property="jadwalWargaId" column="jadwal_warga_id"/>
+            <result property="jadwalId" column="jadwal_id"/>
+            <result property="userId" column="user_id"/>
+            <result property="nama" column="nama"/>
+        </collection>
+    </resultMap>
+
+    <select id="findAll" resultType="com.codean.smart_rw.model.pojo.JadwalRondaPojo">
+        SELECT * FROM jadwal_ronda
+        <if test="sortField != null and sortOrder != null">
+            ORDER BY ${sortField} ${sortOrder}
+        </if>
+        <if test="offset >= 0">
+            OFFSET #{offset}
+        </if>
+        <if test="limit >= 0">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="jadwalId" keyColumn="jadwal_id" parameterType="com.codean.smart_rw.model.pojo.JadwalRondaPojo">
+        INSERT INTO jadwal_ronda
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="jadwalId !=null">jadwal_id,</if>
+            <if test="hari !=null">hari,</if>
+            <if test="jamMulai !=null">jam_mulai,</if>
+            <if test="jamSelesai !=null">jam_selesai,</if>
+            <if test="status !=null">status,</if>
+            <if test="lokasiId !=null">lokasi_id,</if>
+            <if test="createdAt !=null">created_at,</if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="jadwalId !=null">#{jadwalId}::uuid,</if>
+            <if test="hari !=null">#{hari},</if>
+            <if test="jamMulai !=null">#{jamMulai},</if>
+            <if test="jamSelesai !=null">#{jamSelesai},</if>
+            <if test="status !=null">#{status},</if>
+            <if test="lokasiId !=null">#{lokasiId}::uuid,</if>
+            <if test="createdAt !=null">#{createdAt},</if>
+        </trim>
+    </insert>
+
+    <select id="findById" parameterType="String" resultMap="JadwalResultMap">
+        SELECT
+        j.jadwal_id,
+        j.hari,
+        j.jam_mulai,
+        j.jam_selesai,
+        j.status,
+        j.lokasi_id,
+        jw.jadwal_warga_id,
+        jw.jadwal_id,
+        jw.user_id,
+        u.nama
+        FROM jadwal_ronda j left join jadwal_ronda_warga jw
+        on j.jadwal_id = jw.jadwal_id left join users u on jw.user_id = u.user_id
+        WHERE j.jadwal_id=#{jadwalId}::uuid
+    </select>
+
+    <update id="update" parameterType="com.codean.smart_rw.model.pojo.JadwalRondaPojo">
+        UPDATE jadwal_ronda
+        <set>
+            <if test="hari !=null">hari=#{hari},</if>
+            <if test="jamMulai !=null">jam_mulai=#{jamMulai},</if>
+            <if test="jamSelesai !=null">jam_selesai=#{jamSelesai},</if>
+            <if test="status !=null">status=#{status},</if>
+            <if test="lokasiId !=null">lokasi_id=#{lokasiId}::uuid,</if>
+            <if test="updatedAt !=null">updated_at=#{updatedAt},</if>
+        </set>
+        WHERE jadwal_id = #{jadwalId}::uuid
+    </update>
+
+    <delete id="delete">
+        DELETE FROM jadwal_ronda
+        WHERE jadwal_id = #{jadwalId}::uuid
+    </delete>
+</mapper>

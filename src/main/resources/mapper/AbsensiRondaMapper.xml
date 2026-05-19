@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.codean.smart_rw.mapper.AbsensiRondaMapper">
+
+    <select id="findAll" resultType="com.codean.smart_rw.model.pojo.AbsensiRondaPojo">
+        SELECT * FROM absensi
+        <if test="sortField != null and sortOrder != null">
+            ORDER BY ${sortField} ${sortOrder}
+        </if>
+        <if test="offset >= 0">
+            OFFSET #{offset}
+        </if>
+        <if test="limit >= 0">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="absensiId" keyColumn="absensi_id" parameterType="com.codean.smart_rw.model.pojo.AbsensiRondaPojo">
+        INSERT INTO absensi
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="absensiId !=null">absensi_id,</if>
+            <if test="jadwalWargaId !=null">jadwal_warga_id,</if>
+            <if test="status !=null">status,</if>
+            <if test="keterangan !=null">keterangan,</if>
+            <if test="jamMasuk !=null">jam_masuk,</if>
+            <if test="jamKeluar !=null">jam_keluar,</if>
+            <if test="latitude !=null">latitude,</if>
+            <if test="longitude !=null">longitude,</if>
+            <if test="jarak !=null">jarak,</if>
+            <if test="createdAt !=null">created_at,</if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="absensiId !=null">#{absensiId}::uuid,</if>
+            <if test="jadwalWargaId !=null">#{jadwalWargaId}::uuid,</if>
+            <if test="status !=null">#{status},</if>
+            <if test="keterangan !=null">#{keterangan},</if>
+            <if test="jamMasuk !=null">#{jamMasuk},</if>
+            <if test="jamKeluar !=null">#{jamKeluar},</if>
+            <if test="latitude !=null">#{latitude},</if>
+            <if test="longitude !=null">#{longitude},</if>
+            <if test="jarak !=null">#{jarak},</if>
+            <if test="createdAt !=null">#{createdAt},</if>
+        </trim>
+    </insert>
+
+    <select id="findById" parameterType="String">
+        SELECT * FROM absensi
+        WHERE absensi_id=#{absensiId}::uuid
+    </select>
+
+    <update id="update" parameterType="com.codean.smart_rw.model.pojo.AbsensiRondaPojo">
+        UPDATE absensi
+        <set>
+            <if test="status !=null">status=#{status},</if>
+            <if test="keterangan !=null">keterangan=#{keterangan},</if>
+            <if test="jamMasuk !=null">jam_masuk=#{jamMasuk},</if>
+            <if test="jamKeluar !=null">jam_keluar=#{jamKeluar},</if>
+            <if test="latitude !=null">latitude=#{latitude},</if>
+            <if test="longitude !=null">longitude=#{longitude},</if>
+            <if test="jarak !=null">jarak=#{jarak},</if>
+            <if test="updatedAt !=null">updated_at=#{updatedAt},</if>
+        </set>
+        WHERE absensi_id = #{absensiId}::uuid
+    </update>
+
+    <delete id="delete">
+        DELETE FROM absensi
+        WHERE absensi_id = #{absensiId}::uuid
+    </delete>
+
+    <select id="cekAbsen" resultType="boolean">
+        SELECT COUNT(1) > 0 FROM absensi
+        WHERE jadwal_warga_id = #{jadwalWargaId}::uuid
+        AND DATE(created_at) = CURRENT_DATE
+    </select>
+</mapper>

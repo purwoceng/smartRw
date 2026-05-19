@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.codean.smart_rw.mapper.KasJimpitanMapper">
+
+    <select id="findAll" resultType="com.codean.smart_rw.model.pojo.KasJimpitanPojo">
+        SELECT
+        kas_id,
+        tipe,
+        keterangan,
+        jumlah,
+        SUM(CASE
+            WHEN tipe = 'MASUK' THEN jumlah
+            WHEN tipe = 'KELUAR' THEN -jumlah
+        END) OVER (ORDER BY created_at ASC) AS saldo,
+        user_id,
+        created_at,
+        updated_at
+        FROM kas_jimpitan
+        <if test="sortField != null and sortOrder != null">
+            ORDER BY ${sortField} ${sortOrder}
+        </if>
+        <if test="offset >= 0">
+            OFFSET #{offset}
+        </if>
+        <if test="limit >= 0">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <select id="findTotalSaldo" resultType="com.codean.smart_rw.model.pojo.TotalSaldoKasPojo">
+        SELECT
+        SUM(CASE WHEN tipe = 'MASUK' THEN jumlah ELSE 0 END) as total_masuk,
+        SUM(CASE WHEN tipe = 'KELUAR' THEN jumlah ELSE 0 END) as total_keluar,
+        SUM(CASE
+        WHEN tipe = 'MASUK' THEN jumlah
+        WHEN tipe = 'KELUAR' THEN -jumlah
+        ELSE 0
+        END) as jumlah_total
+        FROM kas_jimpitan
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="kasId" keyColumn="kas_id" parameterType="com.codean.smart_rw.model.pojo.KasJimpitanPojo">
+        INSERT INTO kas_jimpitan
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="kasId !=null">kas_id,</if>
+            <if test="tipe !=null">tipe,</if>
+            <if test="jumlah !=null">jumlah,</if>
+            <if test="keterangan !=null">keterangan,</if>
+            <if test="userId !=null">user_id,</if>
+            <if test="createdAt !=null">created_at,</if>
+            <if test="updatedAt !=null">updated_at,</if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="kasId !=null">#{kasId}::uuid,</if>
+            <if test="tipe !=null">#{tipe},</if>
+            <if test="jumlah !=null">#{jumlah},</if>
+            <if test="keterangan !=null">#{keterangan},</if>
+            <if test="userId !=null">#{userId}::uuid,</if>
+            <if test="createdAt !=null">#{createdAt},</if>
+            <if test="updatedAt !=null">#{updatedAt},</if>
+        </trim>
+    </insert>
+
+    <select id="findById" parameterType="String">
+        SELECT * FROM kas_jimpitan
+        WHERE kas_id=#{kasId}::uuid
+    </select>
+
+    <update id="update" parameterType="com.codean.smart_rw.model.pojo.KasJimpitanPojo">
+        UPDATE kas_jimpitan
+        <set>
+            <if test="kasId !=null">kas_id=#{kasId}::uuid,</if>
+            <if test="tipe !=null">tipe=#{tipe},</if>
+            <if test="jumlah !=null">jumlah=#{jumlah},</if>
+            <if test="keterangan !=null">keterangan=#{keterangan},</if>
+            <if test="userId !=null">user_id=#{userId},</if>
+            <if test="updatedAt !=null">#{updatedAt},</if>
+        </set>
+        WHERE kas_id = #{kasId}::uuid
+    </update>
+
+    <delete id="delete">
+        DELETE FROM kas_jimpitan
+        WHERE kas_id = #{kasId}::uuid
+    </delete>
+</mapper>

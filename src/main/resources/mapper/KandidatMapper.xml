@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.codean.smart_rw.mapper.KandidatMapper">
+
+    <resultMap id="KandidatResultMap" type="com.codean.smart_rw.model.pojo.KandidatPojo">
+        <id property="kandidatId" column="kandidat_id"/>
+        <result property="nik" column="nik"/>
+        <result property="image" column="image"/>
+        <result property="totalVote" column="total_vote"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <collection property="voting" ofType="com.codean.smart_rw.model.pojo.VotingPojo">
+            <id property="voteId" column="vote_id"/>
+            <result property="timeVoteId" column="time_vote_id"/>
+            <result property="kandidatId" column="v_kandidat_id"/>
+            <result property="userId" column="user_id"/>
+            <result property="createdAt" column="v_created_at"/>
+            <result property="updatedAt" column="updated_at"/>
+        </collection>
+    </resultMap>
+
+    <select id="findAll" resultType="com.codean.smart_rw.model.pojo.KandidatPojo">
+        SELECT
+        k.kandidat_id,
+        k.nik,
+        k.image,
+        k.total_vote,
+        k.created_at,
+        k.updated_at
+        from kandidat k
+        <if test="sortField != null and sortOrder != null">
+            ORDER BY ${sortField} ${sortOrder}
+        </if>
+        <if test="offset >= 0">
+            OFFSET #{offset}
+        </if>
+        <if test="limit >= 0">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="kandidatId" keyColumn="kandidat_id" parameterType="com.codean.smart_rw.model.pojo.KandidatPojo">
+        INSERT INTO kandidat
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="kandidatId !=null">kandidat_id,</if>
+            <if test="nik !=null">nik,</if>
+            <if test="image !=null">image,</if>
+            <if test="totalVote !=null">total_vote,</if>
+            <if test="createdAt !=null">created_at,</if>
+            <if test="updatedAt !=null">updated_at,</if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="kandidatId !=null">#{kandidatId}::uuid,</if>
+            <if test="nik !=null">#{nik},</if>
+            <if test="image !=null">#{image},</if>
+            <if test="totalVote !=null">#{totalVote},</if>
+            <if test="createdAt !=null">#{createdAt},</if>
+            <if test="updatedAt !=null">#{updatedAt},</if>
+        </trim>
+    </insert>
+
+    <select id="findById" parameterType="String" resultMap="KandidatResultMap">
+        SELECT
+        k.kandidat_id,
+        k.nik,
+        k.image,
+        k.total_vote,
+        k.created_at,
+        k.updated_at,
+        v.vote_id,
+        v.time_vote_id,
+        v.kandidat_id as v_kandidat_id,
+        v.user_id,
+        v.created_at as v_created_at,
+        v.updated_at
+        from kandidat k left join voting v on k.kandidat_id = v.kandidat_id
+        WHERE k.kandidat_id=#{kandidatId}::uuid
+    </select>
+
+    <update id="update" parameterType="com.codean.smart_rw.model.pojo.KandidatPojo">
+        UPDATE kandidat
+        <set>
+            <if test="nik != null">nik = #{nik},</if>
+            <if test="image != null">image = #{image},</if>
+            <if test="updatedAt != null">updated_at = now(),</if>
+        </set>
+        WHERE kandidat_id = #{kandidatId}::uuid
+    </update>
+
+    <delete id="delete">
+        DELETE FROM kandidat
+        WHERE kandidat_id = #{kandidatId}::uuid
+    </delete>
+
+    <update id="incrementTotalVote" parameterType="String">
+        UPDATE kandidat
+        SET total_vote = COALESCE(total_vote, 0) + 1
+        WHERE kandidat_id = #{kandidatId}::uuid
+    </update>
+</mapper>

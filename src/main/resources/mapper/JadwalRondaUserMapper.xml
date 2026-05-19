@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.codean.smart_rw.mapper.JadwalRondaUserMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="jadwalWargaId" keyColumn="jadwal_warga_id" parameterType="com.codean.smart_rw.model.pojo.JadwalRondaUserPojo">
+        INSERT INTO jadwal_ronda_warga
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="jadwalWargaId !=null">jadwal_warga_id,</if>
+            <if test="jadwalId !=null">jadwal_id,</if>
+            <if test="userId !=null">user_id,</if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="jadwalWargaId !=null">#{jadwalWargaId}::uuid,</if>
+            <if test="jadwalId !=null">#{jadwalId}::uuid,</if>
+            <if test="userId !=null">#{userId}::uuid,</if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.codean.smart_rw.model.pojo.JadwalRondaUserPojo">
+        UPDATE jadwal_ronda_warga
+        <set>
+            <if test="jadwalId != null">jadwal_id = #{jadwalId}::uuid,</if>
+            <if test="userId !=null">user_id=#{userId}::uuid,</if>
+        </set>
+        WHERE jadwal_warga_id = #{jadwalWargaId}::uuid
+    </update>
+
+    <delete id="deleteByJadwalId">
+        DELETE FROM jadwal_ronda_warga
+        WHERE jadwal_id = #{jadwalId}::uuid
+    </delete>
+
+    <select id="findByJadwalId">
+        SELECT * FROM jadwal_ronda_warga
+        WHERE jadwal_id = #{jadwalId}::uuid
+    </select>
+
+    <select id="findByDays">
+        SELECT
+        jw.jadwal_warga_id,
+        jw.user_id,
+        j.jam_mulai,
+        j.hari,
+        l.nama_lokasi
+        FROM jadwal_ronda_warga jw JOIN jadwal_ronda j
+        ON jw.jadwal_id = j.jadwal_id JOIN lokasi l
+        ON j.lokasi_id = l.lokasi_id
+        WHERE j.hari = #{hari}
+        AND j.jam_mulai BETWEEN #{jam} AND (#{jam} + INTERVAL '6 hours')
+    </select>
+
+    <select id="findJadwalUser">
+        SELECT
+        jw.jadwal_warga_id,
+        j.jadwal_id,
+        j.hari,
+        j.jam_mulai,
+        j.jam_selesai,
+        j.lokasi_id,
+        l.latitude,
+        l.longitude,
+        l.radius
+        FROM jadwal_ronda_warga jw JOIN
+        jadwal_ronda j ON jw.jadwal_id = j.jadwal_id
+        JOIN lokasi l ON j.lokasi_id=j.lokasi_id
+        WHERE jw.user_id = #{userId}::uuid
+        AND j.hari = #{hari}
+        AND j.status = 'AKTIF'
+    </select>
+</mapper>
