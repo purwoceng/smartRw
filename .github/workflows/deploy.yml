@@ -55,6 +55,7 @@ jobs:
           port: ${{ secrets.SERVER_PORT }}
           script: |
             mv ~/app/*.jar ~/app/app.jar 2>/dev/null || true
+            sudo systemctl daemon-reload
             sudo systemctl restart springboot-app
             sleep 3
             sudo systemctl status springboot-app
