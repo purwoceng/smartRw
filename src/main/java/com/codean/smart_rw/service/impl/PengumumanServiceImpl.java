@@ -9,6 +9,7 @@ import com.codean.smart_rw.model.pojo.PengumumanPojo;
 import com.codean.smart_rw.model.pojo.UsersPojo;
 import com.codean.smart_rw.model.response.DataResponse;
 import com.codean.smart_rw.model.response.DatatableResponse;
+import com.codean.smart_rw.model.response.DefaultResponse;
 import com.codean.smart_rw.model.response.PageDataResponse;
 import com.codean.smart_rw.model.response.ResponseMessage;
 import com.codean.smart_rw.service.PengumumanService;
@@ -179,5 +180,14 @@ public class PengumumanServiceImpl implements PengumumanService {
         return ServletUriComponentsBuilder.fromCurrentContextPath().path("/rw/").path(fileName).toUriString();
     }
 
-
+    @Override
+    public DefaultResponse delete(String id) {
+        try {
+            pengumumanMapper.delete(id);
+            return new DefaultResponse(SUCCESS, ResponseMessage.DATA_DELETED, HttpStatus.OK.value());
+        } catch (Exception e) {
+            log.error("Error when delete a pengumuman.", e);
+            throw e;
+        }
+    }
 }

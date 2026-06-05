@@ -66,8 +66,9 @@ public class UsersServiceImpl implements UsersService {
 
             int offset = (page - 1) * limit;
             List<UsersPojo> pageResult = usersMapper.findAll(offset, limit, sortColumn, sortType);
+            int total = usersMapper.totalData();
 
-            PageDataResponse<UsersPojo> data = new PageDataResponse<>(page, limit, pageResult.size(), pageResult);
+            PageDataResponse<UsersPojo> data = new PageDataResponse<>(page, limit, total, pageResult);
 
             return new DatatableResponse<>(
                     SUCCESS, ResponseMessage.DATA_FETCHED, HttpStatus.OK.value(), data

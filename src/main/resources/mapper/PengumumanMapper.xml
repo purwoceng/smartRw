@@ -37,4 +37,8 @@
         SELECT * FROM pengumuman
         WHERE pengumuman_id=#{pengumumanId}::uuid
     </select>
+
+    <delete id="delete" parameterType="String">
+        DELETE FROM pengumuman WHERE pengumuman_id=#{id}::uuid
+    </delete>
 </mapper>

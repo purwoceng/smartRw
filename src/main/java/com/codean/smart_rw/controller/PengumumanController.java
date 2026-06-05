@@ -3,6 +3,7 @@ package com.codean.smart_rw.controller;
 import com.codean.smart_rw.model.pojo.PengumumanPojo;
 import com.codean.smart_rw.model.response.DataResponse;
 import com.codean.smart_rw.model.response.DatatableResponse;
+import com.codean.smart_rw.model.response.DefaultResponse;
 import com.codean.smart_rw.service.PengumumanService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -11,6 +12,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -59,5 +61,15 @@ public class PengumumanController {
     )throws IOException {
         DataResponse<PengumumanPojo> data = pengumumanService.create(pengumumanPojo);
         return ResponseEntity.ok().body(data);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping
+    @Operation(
+            summary = "Delete Pengumuman"
+    )
+    public ResponseEntity<DefaultResponse> delete(@RequestParam String id) {
+        DefaultResponse response = pengumumanService.delete(id);
+        return ResponseEntity.ok().body(response);
     }
 }

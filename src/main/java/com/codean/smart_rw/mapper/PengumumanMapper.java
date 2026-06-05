@@ -13,4 +13,6 @@ public interface PengumumanMapper {
     PengumumanPojo findById(String id);
 
     void insert(PengumumanPojo pengumumanPojo);
+
+    void delete(String id);
 }
