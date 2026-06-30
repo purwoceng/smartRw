@@ -202,8 +202,9 @@ public class UsersServiceImpl implements UsersService {
             String jwtToken = jwtService.generateToken(userDetails);
 
             return new DataResponse<>(SUCCESS, ResponseMessage.LOGIN_SUCCESS, HttpStatus.OK.value(), new LoginResponse(jwtToken));
-        }catch (Exception e){
-            throw new NotFoundException("user tidak ketemu");
+        } catch (Exception e) {
+            log.error("Login failed for email: {}", loginUsersDTO.getEmail(), e);
+            throw new NotFoundException("user tidak ketemu (Detail: " + e.getMessage() + ")");
         }
     }
 

@@ -4,6 +4,8 @@ import com.codean.smart_rw.exception.custom.NotFoundException;
 import com.codean.smart_rw.mapper.LogNotifikasiMapper;
 import com.codean.smart_rw.mapper.PengumumanMapper;
 import com.codean.smart_rw.mapper.UsersMapper;
+import com.codean.smart_rw.messaging.NotificationProducer;
+import com.codean.smart_rw.model.dto.NotifikasiMessage;
 import com.codean.smart_rw.model.pojo.LogNotifikasiPojo;
 import com.codean.smart_rw.model.pojo.PengumumanPojo;
 import com.codean.smart_rw.model.pojo.UsersPojo;
@@ -43,6 +45,8 @@ public class PengumumanServiceImpl implements PengumumanService {
     private String uploadDir;
 
     private final TelegramService telegramService;
+
+    private final NotificationProducer notificationProducer;
 
     private static final String SUCCESS = "Success";
 
@@ -101,40 +105,18 @@ public class PengumumanServiceImpl implements PengumumanService {
             log.info("Jumlah user chatId = {}", users.size());
 
 
-            for (UsersPojo u:users){
-                LogNotifikasiPojo logNotif = new LogNotifikasiPojo();
-                logNotif.setLogId(UUID.randomUUID().toString());
-                logNotif.setPengumumanId(pengumumanPojo.getPengumumanId());
-                logNotif.setUserId(u.getUserId());
-                logNotif.setChannel("Telegram");
-                logNotif.setSentAt(new DateHelper().getCurrentTimestamp());
-                logNotif.setJenisNotifikasi("Pengumuman");
+            for (UsersPojo u: users){
+                if(u.getChatId() == null || u.getChatId().isBlank()) continue;
 
-                try{
-                    if(pengumumanPojo.getMultipartFile() !=null && !pengumumanPojo.getMultipartFile().isEmpty()){
-                            if (telegramService.isChatIdValid(u.getChatId())) {
-                                String response = telegramService.sendPhoto(u.getChatId(), pengumumanPojo.getImage(), pengumumanPojo.getDeskripsi());
-                                logNotif.setStatus("Success");
-                                logNotif.setResponseTelegram(response);
-                            }
-                    }else {
-                        if (telegramService.isChatIdValid(u.getChatId())) {
-                            String response = telegramService.sendMessage(u.getChatId(), pengumumanPojo.getDeskripsi());
-                            log.info("Kirim telegram ke userId={}, chatId={}", u.getUserId(), u.getChatId());
+                NotifikasiMessage msg = new NotifikasiMessage();
+                msg.setChatId(u.getChatId());
+                msg.setPesan(pengumumanPojo.getDeskripsi());
+                msg.setUserId(u.getUserId());
+                msg.setJenis("Pengumuman");
+                msg.setPengumumanId(pengumumanPojo.getPengumumanId());
+                msg.setImageUrl(pengumumanPojo.getImage());
 
-                            logNotif.setStatus("Success");
-                            logNotif.setResponseTelegram(response);
-
-                        }
-                    }
-
-                }catch (Exception e){
-                    log.warn("Gagal kirim telegram ke userid={}",u.getUserId(),e);
-
-                    logNotif.setStatus("Failed");
-                    logNotif.setResponseTelegram(e.getMessage());
-                }
-                logNotifikasiMapper.insert(logNotif);
+                notificationProducer.publish(msg);
             }
             PengumumanPojo data = pengumumanMapper.findById(pengumumanPojo.getPengumumanId());
             return new DataResponse<>(SUCCESS, ResponseMessage.DATA_CREATED,HttpStatus.OK.value(), data);
