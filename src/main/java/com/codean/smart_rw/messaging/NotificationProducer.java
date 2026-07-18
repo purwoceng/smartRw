@@ -23,5 +23,6 @@ public class NotificationProducer {
 
     public void publish(NotifikasiMessage message){
         log.info("Publising notifikasi ke queue untuk userid={},jenis={}",message.getUserId(),message.getJenis());
+        rabbitTemplate.convertAndSend(exchange, routingKey, message);
     }
 }

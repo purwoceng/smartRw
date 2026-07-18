@@ -35,11 +35,16 @@ public class NotificationConsumer {
         logNotif.setSentAt(new DateHelper().getCurrentTimestamp());
 
         try{
+            String pesan = message.getPesan();
+            if (pesan == null || pesan.isBlank()) {
+                pesan = "Pesan dari Smart RW";
+            }
+
             String response;
             if(message.getImageUrl() != null && !message.getImageUrl().isBlank()){
-                response = telegramService.sendPhoto(message.getChatId(), message.getImageUrl(), message.getPesan());
+                response = telegramService.sendPhoto(message.getChatId(), message.getImageUrl(), pesan);
             }else {
-                response = telegramService.sendMessage(message.getChatId(), message.getPesan());
+                response = telegramService.sendMessage(message.getChatId(), pesan);
             }
             logNotif.setStatus("Success");
             logNotif.setResponseTelegram(response);

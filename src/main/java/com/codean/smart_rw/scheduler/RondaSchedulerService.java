@@ -2,13 +2,11 @@ package com.codean.smart_rw.scheduler;
 
 import com.codean.smart_rw.mapper.JadwalRondaMapper;
 import com.codean.smart_rw.mapper.JadwalRondaUserMapper;
-import com.codean.smart_rw.mapper.LogNotifikasiMapper;
 import com.codean.smart_rw.mapper.UsersMapper;
+import com.codean.smart_rw.messaging.NotificationProducer;
+import com.codean.smart_rw.model.dto.NotifikasiMessage;
 import com.codean.smart_rw.model.pojo.JadwalRondaUserPojo;
-import com.codean.smart_rw.model.pojo.LogNotifikasiPojo;
 import com.codean.smart_rw.model.pojo.UsersPojo;
-import com.codean.smart_rw.service.TelegramService;
-import com.codean.smart_rw.util.DateHelper;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,7 +16,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -29,9 +26,7 @@ public class RondaSchedulerService {
 
     private final UsersMapper usersMapper;
 
-    private final TelegramService telegramService;
-
-    private final LogNotifikasiMapper logNotifikasiMapper;
+    private final NotificationProducer notificationProducer;
 
     private static final Logger log = LogManager.getLogger(RondaSchedulerService.class);
 
@@ -68,37 +63,27 @@ public class RondaSchedulerService {
                 continue;
             }
 
-            LogNotifikasiPojo logNotif = new LogNotifikasiPojo();
-            logNotif.setLogId(UUID.randomUUID().toString());
-            logNotif.setChannel("Telegram");
-            logNotif.setJenisNotifikasi("Notif Scheduller");
-            logNotif.setSentAt(new DateHelper().getCurrentTimestamp());
-            logNotif.setUserId(user.getUserId());
-            logNotif.setStatus("Success");
+            String message = String.format(
+                    "*Pengingat Jadwal Ronda*\n\n" +
+                            "Halo %s \n" +
+                            "Anda dijadwalkan ronda pada hari ini.\n\n" +
+                            "Hari   :%s\n\n" +
+                            "Jam    : %s\n\n" +
+                            "Lokasi :%s\n\n" +
+                            "Mohon hadir tepat waktu ",
+                    user.getNama(),
+                    j.getHari(),
+                    j.getJamMulai(),
+                    j.getNamaLokasi()
+            );
 
-            try {
-                String message = String.format(
-                        "*Pengingat Jadwal Ronda*\n\n" +
-                                "Halo %s \n" +
-                                "Anda dijadwalkan ronda pada hari ini.\n\n" +
-                                "Hari   :%s\n\n" +
-                                "Jam    : %s\n\n" +
-                                "Lokasi :%s\n\n" +
-                                "Mohon hadir tepat waktu ",
-                        user.getNama(),
-                        j.getHari(),
-                        j.getJamMulai(),
-                        j.getNamaLokasi()
-                );
+            NotifikasiMessage msg = new NotifikasiMessage();
+            msg.setChatId(user.getChatId());
+            msg.setPesan(message);
+            msg.setUserId(user.getUserId());
+            msg.setJenis("Notif Scheduler");
 
-                String response = telegramService.sendMessage(user.getChatId(), message);
-                logNotif.setResponseTelegram(response);
-            } catch (Exception e) {
-                log.error("Error scheduler ronda", e);
-                logNotif.setStatus("Failed");
-                logNotif.setResponseTelegram(e.getMessage());
-            }
-            logNotifikasiMapper.insert(logNotif);
+            notificationProducer.publish(msg);
         }
     }
 }

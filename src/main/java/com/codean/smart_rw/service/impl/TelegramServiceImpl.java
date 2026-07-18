@@ -7,6 +7,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
@@ -36,7 +39,11 @@ public class TelegramServiceImpl implements TelegramService {
             Map<String,Object> body = new HashMap<>();
             body.put("chat_id",cleanChatId);
             body.put("text",message);
-            String response = restTemplate.postForObject(url,body, String.class);
+            log.info("sendMessage -> chatId='{}', text='{}'", cleanChatId, message);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+            String response = restTemplate.postForObject(url, entity, String.class);
             return response;
         }catch (Exception e){
             log.error("Error when send message.", e);
@@ -54,7 +61,10 @@ public class TelegramServiceImpl implements TelegramService {
             body.put("chat_id",cleanChatId);
             body.put("photo",photo);
             body.put("caption",caption);
-            String response = restTemplate.postForObject(url,body, String.class);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+            String response = restTemplate.postForObject(url, entity, String.class);
             return response;
         } catch (Exception e) {
             log.error("error when send message ",e);

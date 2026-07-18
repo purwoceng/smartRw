@@ -116,6 +116,8 @@ public class PengumumanServiceImpl implements PengumumanService {
                 msg.setPengumumanId(pengumumanPojo.getPengumumanId());
                 msg.setImageUrl(pengumumanPojo.getImage());
 
+                log.info("DEBUG sebelum publish -> pesan='{}', imageUrl='{}'", msg.getPesan(), msg.getImageUrl());
+
                 notificationProducer.publish(msg);
             }
             PengumumanPojo data = pengumumanMapper.findById(pengumumanPojo.getPengumumanId());
